@@ -12,15 +12,17 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @Service
 public class FaqService {
 	
 	private final VectorStore vectorStore;
 	
-	public FaqService(VectorStore vectorStore) {
-		this.vectorStore = vectorStore;
-	}
+//	public FaqService(VectorStore vectorStore) {
+//		this.vectorStore = vectorStore;
+//	}
 	
 	
 	@PostConstruct

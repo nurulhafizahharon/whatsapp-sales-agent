@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import sg.edu.nusiss.whatsappsalesagent.dto.ChatRequest;
 import sg.edu.nusiss.whatsappsalesagent.dto.ChatResponse;
 import sg.edu.nusiss.whatsappsalesagent.service.FaqService;
+import sg.edu.nusiss.whatsappsalesagent.tool.InventoryTools;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -17,10 +18,12 @@ public class ChatController {
 	
 	private final ChatClient chatClient;
 	private final FaqService faqService;
+	private final InventoryTools inventoryTools;
 	
-	public ChatController(ChatClient.Builder chatClientBuilder, FaqService faqService) {
+	public ChatController(ChatClient.Builder chatClientBuilder, FaqService faqService, InventoryTools inventoryTools) {
 		this.chatClient = chatClientBuilder.build();
 		this.faqService = faqService;
+		this.inventoryTools = inventoryTools;
 	}
 	
 	@GetMapping("/hello")
@@ -44,7 +47,42 @@ public class ChatController {
 								.system("""
 								You are a WhatsApp sales assistant for TheBubblyGem,
 							    a fashion retailer in Singapore.
-							
+							    
+							    You have access to tools that provide live business data.
+
+								For questions about current product availability, stock,
+								quantity or whether a size is available, ALWAYS use the
+								inventory tool.
+								
+								Never guess inventory information.
+								
+								Never use the FAQ knowledge base as a source for current
+								stock availability.
+								
+								Use COMPANY INFORMATION for static FAQ and policy questions.
+								
+								Use tools for live business information.
+								
+								When a tool returns inventory information, answer using
+								the tool result exactly. Do not change product prices,
+								sizes or quantities.
+								
+								When using the inventory tool:
+
+								- If found=true and available=true, the requested
+								  product and size are in stock.
+								
+								- If found=true and available=false, the requested
+								  product and size exist but are currently out of stock.
+								
+								- If found=false, do NOT say the item is sold out.
+								  Say that the requested product or size could not
+								  be found in the inventory system.
+								
+								Never claim that you can notify a customer when an
+								item is back in stock unless a notification tool
+								actually exists.
+															
 							    You must follow these rules strictly:
 							
 							    1. Answer company-related questions using ONLY the
@@ -80,6 +118,7 @@ public class ChatController {
 				                
 								""" + faqContext)
 								.user(message)
+								.tools(inventoryTools)
 								.call()
 								.content();
 		return new ChatResponse(aiResponse, "FAQ", false);
