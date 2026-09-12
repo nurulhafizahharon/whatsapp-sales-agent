@@ -15,5 +15,8 @@ public class CustomerContext {
 	private String customerName;
 	private String phoneNumber;
 	private String customerMessage;
+	private boolean inventoryChecked;
+	private boolean salesLeadCreated;
+	private boolean escalated;
 
 }

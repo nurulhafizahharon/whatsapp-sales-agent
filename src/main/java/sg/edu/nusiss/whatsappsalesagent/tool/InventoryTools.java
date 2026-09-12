@@ -4,6 +4,7 @@ import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
+import sg.edu.nusiss.whatsappsalesagent.context.CustomerContext;
 import sg.edu.nusiss.whatsappsalesagent.dto.InventoryResponse;
 import sg.edu.nusiss.whatsappsalesagent.service.InventoryService;
 
@@ -12,6 +13,7 @@ import sg.edu.nusiss.whatsappsalesagent.service.InventoryService;
 public class InventoryTools {
 	
 	private final InventoryService inventoryService;
+	private final CustomerContext customerContext;
 	
 	@Tool(description = """
             Check current product inventory.
@@ -35,7 +37,7 @@ public class InventoryTools {
 		System.out.println("AI TOOL CALLED: checkInventory");
 		
 		System.out.println("Product: " + productName + ", Size: " + size);
-		
+		customerContext.setInventoryChecked(true);
 		return inventoryService.checkInventory(productName, size);
 	}
 

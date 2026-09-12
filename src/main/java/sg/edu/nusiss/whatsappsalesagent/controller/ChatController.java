@@ -7,11 +7,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import sg.edu.nusiss.whatsappsalesagent.context.CustomerContext;
 import sg.edu.nusiss.whatsappsalesagent.dto.ChatRequest;
 import sg.edu.nusiss.whatsappsalesagent.dto.ChatResponse;
 import sg.edu.nusiss.whatsappsalesagent.service.ConversationService;
 import sg.edu.nusiss.whatsappsalesagent.service.FaqService;
+import sg.edu.nusiss.whatsappsalesagent.tool.EscalationTools;
 import sg.edu.nusiss.whatsappsalesagent.tool.InventoryTools;
 import sg.edu.nusiss.whatsappsalesagent.tool.SalesTools;
 
@@ -25,19 +27,22 @@ public class ChatController {
 	private final CustomerContext customerContext;
 	private final SalesTools salesTools;
 	private final ConversationService conversationService;
+	private final EscalationTools escalationTools;
 	
 	public ChatController(ChatClient.Builder chatClientBuilder, 
 			FaqService faqService, 
 			InventoryTools inventoryTools, 
 			CustomerContext customerContext,
 			SalesTools salesTools,
-			ConversationService conversationService) {
+			ConversationService conversationService,
+			EscalationTools escalationTools) {
 		this.chatClient = chatClientBuilder.build();
 		this.faqService = faqService;
 		this.inventoryTools = inventoryTools;
 		this.customerContext = customerContext;
 		this.salesTools = salesTools;
 		this.conversationService = conversationService;
+		this.escalationTools = escalationTools;
 	}
 	
 	@GetMapping("/hello")
@@ -51,7 +56,7 @@ public class ChatController {
 //	}
 	
 	@PostMapping
-	public ChatResponse chat(@RequestBody ChatRequest request) {
+	public ChatResponse chat(@Valid @RequestBody ChatRequest request) {
 		
 		String message = request.message();
 		String customerName = request.customerName();
@@ -170,13 +175,71 @@ public class ChatController {
 							    Do not invent details that do not appear in the
 							    conversation history, approved company information,
 							    or tool results.
+							    
+							    HUMAN ESCALATION RULES:
+
+								Use the escalateToHuman tool when an enquiry requires
+								human investigation, judgement or intervention.
+								
+								Examples include:
+								- missing or significantly delayed parcels
+								- serious complaints
+								- refund disputes
+								- unresolved payment issues
+								- repeated unresolved problems
+								- an explicit request to speak to a human
+								
+								Do NOT escalate ordinary FAQ questions that can be
+								answered using approved company information.
+								
+								Do NOT escalate ordinary inventory questions that can
+								be answered using the inventory tool.
+								
+								Only tell the customer that their enquiry has been
+								escalated after the escalation tool succeeds.
+								
+								Priority guidance:
+								HIGH - urgent financial/order problem, serious complaint,
+								       missing parcel or issue needing prompt intervention.
+								
+								MEDIUM - issue requiring staff assistance but not urgent.
+								
+								LOW - non-urgent request for human assistance.
+								
+								When an escalation is created, tell the customer that
+								the enquiry has been referred to the team for follow-up.
+								
+								Do not say:
+								- "please wait while we investigate"
+								- "we are connecting you now"
+								- "someone will respond immediately"
+								- "someone will contact you shortly"
+								
+								unless the application actually provides that capability.
+								
+								Do not promise a response time that is not present in
+								approved company information.
 							    """)
 								.user(message)
-								.tools(inventoryTools, salesTools)
+								.tools(inventoryTools, salesTools, escalationTools)
 								.call()
 								.content();
 		conversationService.addAssistantMessage(phoneNumber, aiResponse);
-		return new ChatResponse(aiResponse, "FAQ", false);
+		return new ChatResponse(aiResponse, determineResponseType(), customerContext.isEscalated());
+	}
+	
+	private String determineResponseType() {
+		if(customerContext.isEscalated()) {
+			return "ESCALATION";
+		}
+		if(customerContext.isSalesLeadCreated()) {
+			return "SALES_LEAD";
+		}
+		if(customerContext.isInventoryChecked()) {
+			return "INVENTORY";
+		}
+		
+		return "FAQ";
 	}
 
 }

@@ -39,6 +39,8 @@ public class SalesTools {
 				productName, 
 				customerContext.getCustomerMessage());
 		
+		customerContext.setSalesLeadCreated(true);
+		
 		return "Sales lead created successfully with ID " + lead.getId(); 
 	}
 
