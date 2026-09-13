@@ -24,6 +24,8 @@ function DataDeletion() {
         After the request has been verified, applicable stored information
         associated with the request will be deleted.
       </p>
+
+      <p>To request deletion, contact: your-public-contact-email@example.com</p>
     </main>
   );
 }
