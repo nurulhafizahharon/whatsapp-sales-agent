@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import sg.edu.nusiss.whatsappsalesagent.dto.ChatResponse;
 import sg.edu.nusiss.whatsappsalesagent.service.SalesAgentService;
+import sg.edu.nusiss.whatsappsalesagent.service.WhatsAppService;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -23,6 +24,7 @@ public class WhatsAppWebhookController {
 	
 	private final ObjectMapper objectMapper;
 	private final SalesAgentService salesAgentService;
+	private final WhatsAppService whatsAppService;
 	
 	@Value("${whatsapp.verify-token}")
 	private String verifyToken;
@@ -109,6 +111,8 @@ public class WhatsAppWebhookController {
 	        System.out.println("Type: " + response.type());
 	        System.out.println("Escalated: " + response.escalated());
 	        System.out.println("=================================");
+	        
+	        whatsAppService.sendTextMessage(phoneNumber,response.response());
 		} catch (Exception e) {
 			System.out.println("Error processing WhatsApp webhook: " + e.getMessage());
 		}
@@ -121,5 +125,11 @@ public class WhatsAppWebhookController {
 
 	    return ResponseEntity.ok().build();
 	}
+	
+//	@PostMapping("/send-test")
+//	public ResponseEntity<String> sendTest(@RequestParam String to) {
+//	    whatsAppService.sendTextMessage(to,"Hello from my Spring Boot WhatsApp Sales Agent!");
+//	    return ResponseEntity.ok("Message sent");
+//	}
 	
 }
