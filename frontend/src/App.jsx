@@ -17,6 +17,13 @@ function App() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    const path = window.location.pathname;
+
+    // Do not load dashboard data for static/legal pages
+    if (path === "/privacy" || path === "/data-deletion") {
+      return;
+    }
+
     loadDashboard(true);
     const interval = setInterval(() => {
       loadDashboard(false);
@@ -60,6 +67,15 @@ function App() {
         setLoading(false);
       }
     }
+  }
+  const path = window.location.pathname;
+
+  if (path === "/privacy") {
+    return <PrivacyPolicy />;
+  }
+
+  if (path === "/data-deletion") {
+    return <DataDeletion />;
   }
 
   if (loading) {
@@ -109,15 +125,7 @@ function App() {
     }
   }
 
-  const path = window.location.pathname;
-
-  if (path === "/privacy") {
-    return <PrivacyPolicy />;
-  }
-
-  if (path === "/data-deletion") {
-    return <DataDeletion />;
-  }
+  
   return (
     <div className="dashboard">
       <header className="header">
