@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import './App.css'
+import "./App.css";
+import PrivacyPolicy from "./PrivacyPolicy";
+import DataDeletion from "./DataDeletion";
 
 function App() {
   const [stats, setStats] = useState({
     newLeads: 0,
     operEscalations: 0,
-    totalProducts: 0
+    totalProducts: 0,
   });
 
   const [leads, setLeads] = useState([]);
@@ -107,6 +109,15 @@ function App() {
     }
   }
 
+  const path = window.location.pathname;
+
+  if (path === "/privacy") {
+    return <PrivacyPolicy />;
+  }
+
+  if (path === "/data-deletion") {
+    return <DataDeletion />;
+  }
   return (
     <div className="dashboard">
       <header className="header">
