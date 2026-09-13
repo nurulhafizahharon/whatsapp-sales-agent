@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,6 +36,16 @@ public class DashboardController {
 	@GetMapping("/escalations")
 	public List<Escalation> getEscalation() {
 		return dashboardService.getEscalation();
+	}
+	
+	@PutMapping("/leads/{id}/contacted")
+	public SalesLead markLeadAsContacted(@PathVariable Long id) {
+		return dashboardService.markLeadAsContacted(id);
+	}
+	
+	@PutMapping("/escalations/{id}/resolve")
+	public Escalation resolveEscalation(@PathVariable Long id) {
+		return dashboardService.resolveEscalation(id);
 	}
 
 }

@@ -15,24 +15,31 @@ function App() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    loadDashboard();
+    loadDashboard(true);
+    const interval = setInterval(() => {
+      loadDashboard(false);
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
 
-  async function loadDashboard() {
+  async function loadDashboard(showLoading = false) {
     try {
-      setLoading(true);
+      if (showLoading) {
+        setLoading(true);
+      }
       setError("");
 
-      const [statsResponse, leadsResponse, escalationsResponse] = await Promise.all([
-        fetch("http://localhost:8080/api/dashboard/stats"),
-        fetch("http://localhost:8080/api/dashboard/leads"),
-        fetch("http://localhost:8080/api/dashboard/escalations")
-      ]);
-      
-      if(!statsResponse.ok ||
-        !leadsResponse.ok ||
-        !escalationsResponse.ok
-      ) {
+      const [statsResponse, leadsResponse, escalationsResponse] =
+        await Promise.all([
+          fetch("http://localhost:8080/api/dashboard/stats"),
+          fetch("http://localhost:8080/api/dashboard/leads"),
+          fetch("http://localhost:8080/api/dashboard/escalations"),
+        ]);
+
+      if (!statsResponse.ok || !leadsResponse.ok || !escalationsResponse.ok) {
         throw new Error("Unable to load dashboard data.");
       }
 
@@ -45,18 +52,59 @@ function App() {
       setEscalations(escalationsData);
     } catch (err) {
       console.error(err);
-      setError("Unable to connect to the sales dashboard API.")
+      setError("Unable to connect to the sales dashboard API.");
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   }
 
-  if(loading) {
-    return <p>Loading dashboard...</p>
+  if (loading) {
+    return <p>Loading dashboard...</p>;
   }
 
-  if(error) {
-    return <p>{error}</p>
+  if (error) {
+    return <p>{error}</p>;
+  }
+
+  async function markLeadContacted(id) {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/dashboard/leads/${id}/contacted`,
+        {
+          method: "PUT",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Unable to update sales lead.");
+      }
+      await loadDashboard();
+    } catch (err) {
+      console.error(err);
+      alert("Unable to update sales lead");
+    }
+  }
+
+  async function resolveEscalation(id) {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/dashboard/escalations/${id}/resolve`,
+        {
+          method: "PUT",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Unable to resolve escalation.");
+      }
+
+      await loadDashboard();
+    } catch (err) {
+      console.error(err);
+      alert("Unable to resolve escalation.");
+    }
   }
 
   return (
@@ -74,20 +122,18 @@ function App() {
       </header>
       <main className="content">
         <section className="stats-grid">
-          <StatCard value={stats.newLeads} title="New Sales Leads"/>
-          <StatCard value={stats.openEscalations} title="Open Escalations"/>
-          <StatCard value={stats.totalProducts} title="Products"/>
+          <StatCard value={stats.newLeads} title="New Sales Leads" />
+          <StatCard value={stats.openEscalations} title="Open Escalations" />
+          <StatCard value={stats.totalProducts} title="Products" />
         </section>
 
         <section className="panel">
           <div className="panel-header">
             <div>
               <h2>Sales Leads</h2>
-              <p>Customers showing purchase intent</p>
+              <p>AI-detected purchase opportunities and follow-up status</p>
             </div>
-            <span className="count-badge">
-              {leads.length}
-            </span>
+            <span className="count-badge">{leads.length}</span>
           </div>
           <table>
             <thead>
@@ -97,16 +143,35 @@ function App() {
                 <th>Product</th>
                 <th>Status</th>
                 <th>Created</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {leads.map((lead) => (
                 <tr key={lead.id}>
-                  <td><strong>{lead.customerName}</strong></td>
+                  <td>
+                    <strong>{lead.customerName}</strong>
+                  </td>
                   <td>{lead.phoneNumber}</td>
                   <td>{lead.productName}</td>
-                  <td><span className="badge new">{lead.status}</span></td>
+                  <td>
+                    <span className={"badge " + lead.status.toLowerCase()}>
+                      {lead.status}
+                    </span>
+                  </td>
                   <td>{formatDate(lead.createdAt)}</td>
+                  <td>
+                    {lead.status === "NEW" ? (
+                      <button
+                        className="action-button"
+                        onClick={() => markLeadContacted(lead.id)}
+                      >
+                        Mark Contacted
+                      </button>
+                    ) : (
+                      <span>-</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -120,9 +185,7 @@ function App() {
               <p>Enquiries escalated by the AI agent</p>
             </div>
 
-            <span className="count-badge">
-              {escalations.length}
-            </span>
+            <span className="count-badge">{escalations.length}</span>
           </div>
           <table>
             <thead>
@@ -132,16 +195,39 @@ function App() {
                 <th>Priority</th>
                 <th>Status</th>
                 <th>Created</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {escalations.map((item) => (
                 <tr key={item.id}>
-                  <td><strong>{item.customerName}</strong></td>
+                  <td>
+                    <strong>{item.customerName}</strong>
+                  </td>
                   <td>{item.reason}</td>
-                  <td><span className={"badge " + item.priority.toLowerCase()}>{item.priority}</span></td>
-                  <td><span className="badge open">{item.status}</span></td>
+                  <td>
+                    <span className={"badge " + item.priority.toLowerCase()}>
+                      {item.priority}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={"badge " + item.status.toLowerCase()}>
+                      {item.status}
+                    </span>
+                  </td>
                   <td>{formatDate(item.createdAt)}</td>
+                  <td>
+                    {item.status === "OPEN" ? (
+                      <button
+                        className="resolve-button"
+                        onClick={() => resolveEscalation(item.id)}
+                      >
+                        Resolve
+                      </button>
+                    ) : (
+                      <span>-</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -149,7 +235,7 @@ function App() {
         </section>
       </main>
     </div>
-  )
+  );
 }
 
 function StatCard({value, title}) {

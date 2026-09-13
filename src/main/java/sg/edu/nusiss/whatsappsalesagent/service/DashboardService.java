@@ -22,6 +22,9 @@ public class DashboardService {
 	private final EscalationRepository escalationRepository;
 	private final ProductRepository productRepository;
 	
+	private final SalesLeadService salesLeadService;
+	private final EscalationService escalationService;
+	
 	public DashboardStats getStats() {
 		return new DashboardStats(
 				salesLeadRepository.countByStatusIgnoreCase("NEW"),
@@ -35,6 +38,14 @@ public class DashboardService {
 	
 	public List<Escalation> getEscalation() {
 		return escalationRepository.findAll(Sort.by(Sort.Direction.DESC, Escalation::getCreatedAt));
+	}
+	
+	public SalesLead markLeadAsContacted(Long id) {
+		return salesLeadService.markAsContacted(id);
+	}
+	
+	public Escalation resolveEscalation(Long id) {
+		return escalationService.resolve(id);
 	}
 	
 	

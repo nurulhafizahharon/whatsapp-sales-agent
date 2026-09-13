@@ -183,3 +183,41 @@ tr:hover {
     overflow-x: auto;
   }
 }
+
+/* ACTION BUTTONS */
+.action-button,
+.resolve-button {
+  border: none;
+  border-radius: 7px;
+  padding: 8px 12px;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.action-button {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.resolve-button {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.action-button:hover,
+.resolve-button:hover {
+  opacity: 0.8;
+}
+
+.badge.contacted {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge.resolved {
+  background: #dcfce7;
+  color: #166534;
+}

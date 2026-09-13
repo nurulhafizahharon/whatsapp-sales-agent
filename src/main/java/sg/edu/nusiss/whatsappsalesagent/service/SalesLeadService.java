@@ -4,9 +4,9 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
-
 import lombok.RequiredArgsConstructor;
 import sg.edu.nusiss.whatsappsalesagent.entity.SalesLead;
+import sg.edu.nusiss.whatsappsalesagent.exception.ResourceNotFoundException;
 import sg.edu.nusiss.whatsappsalesagent.repository.SalesLeadRepository;
 
 @Service
@@ -31,7 +31,7 @@ public class SalesLeadService {
 		SalesLead lead = salesLeadRepository
 							.findById(id)
 							.orElseThrow(() -> 
-								new IllegalArgumentException("Sales lead not found: " + id));
+								new ResourceNotFoundException("Sales lead not found: " + id));
 		lead.setStatus("CONTACTED");
 		
 		return salesLeadRepository.save(lead);

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import sg.edu.nusiss.whatsappsalesagent.entity.Escalation;
+import sg.edu.nusiss.whatsappsalesagent.exception.ResourceNotFoundException;
 import sg.edu.nusiss.whatsappsalesagent.repository.EscalationRepository;
 
 @Service
@@ -32,7 +33,7 @@ public class EscalationService {
 		Escalation escalation = escalationRepository
 									.findById(id)
 									.orElseThrow(() -> 
-											new IllegalArgumentException("Escalation not found: " + id));
+											new ResourceNotFoundException("Escalation not found: " + id));
 		escalation.setStatus("RESOLVED");
 		
 		return escalationRepository.save(escalation);
