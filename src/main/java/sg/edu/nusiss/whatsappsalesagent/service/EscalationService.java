@@ -27,5 +27,15 @@ public class EscalationService {
 		
 		return escalationRepository.save(escalation);
 	}
+	
+	public Escalation resolve(Long id) {
+		Escalation escalation = escalationRepository
+									.findById(id)
+									.orElseThrow(() -> 
+											new IllegalArgumentException("Escalation not found: " + id));
+		escalation.setStatus("RESOLVED");
+		
+		return escalationRepository.save(escalation);
+	}
 
 }

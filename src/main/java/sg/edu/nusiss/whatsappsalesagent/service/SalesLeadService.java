@@ -13,7 +13,7 @@ import sg.edu.nusiss.whatsappsalesagent.repository.SalesLeadRepository;
 @RequiredArgsConstructor
 public class SalesLeadService {
 	
-	private final SalesLeadRepository salesRepository;
+	private final SalesLeadRepository salesLeadRepository;
 	
 	public SalesLead createLead(String customerName, String phoneNumber, String productName, String customerMessage) {
 		SalesLead lead = SalesLead.builder()
@@ -24,7 +24,17 @@ public class SalesLeadService {
 							.status("NEW")
 							.createdAt(LocalDateTime.now())
 							.build();
-		return salesRepository.save(lead);
+		return salesLeadRepository.save(lead);
+	}
+	
+	public SalesLead markAsContacted(Long id) {
+		SalesLead lead = salesLeadRepository
+							.findById(id)
+							.orElseThrow(() -> 
+								new IllegalArgumentException("Sales lead not found: " + id));
+		lead.setStatus("CONTACTED");
+		
+		return salesLeadRepository.save(lead);
 	}
 
 }
