@@ -18,7 +18,10 @@ import sg.edu.nusiss.whatsappsalesagent.service.DashboardService;
 @RestController
 @RequestMapping("/api/dashboard")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {
+	    "http://localhost:5173",
+	    "https://whatsapp-sales-agent-nine.vercel.app"
+	})
 public class DashboardController {
 	
 	private final DashboardService dashboardService;

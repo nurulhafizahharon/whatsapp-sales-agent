@@ -47,12 +47,6 @@ function PrivacyPolicy() {
 
       <h2>Contact</h2>
       <p>
-        For privacy questions or data deletion requests, please contact the
-        application administrator.
-      </p>
-
-      <h2>Contact</h2>
-      <p>
         For privacy questions or data deletion requests, please contact:
         your-public-contact-email@example.com
       </p>

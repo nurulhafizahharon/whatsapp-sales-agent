@@ -3,6 +3,9 @@ import "./App.css";
 import PrivacyPolicy from "./PrivacyPolicy";
 import DataDeletion from "./DataDeletion";
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+
 function App() {
   const [stats, setStats] = useState({
     newLeads: 0,
@@ -43,9 +46,9 @@ function App() {
 
       const [statsResponse, leadsResponse, escalationsResponse] =
         await Promise.all([
-          fetch("http://localhost:8080/api/dashboard/stats"),
-          fetch("http://localhost:8080/api/dashboard/leads"),
-          fetch("http://localhost:8080/api/dashboard/escalations"),
+          fetch(`${API_BASE_URL}/api/dashboard/stats`),
+          fetch(`${API_BASE_URL}/api/dashboard/leads`),
+          fetch(`${API_BASE_URL}/api/dashboard/escalations`),
         ]);
 
       if (!statsResponse.ok || !leadsResponse.ok || !escalationsResponse.ok) {
@@ -89,7 +92,7 @@ function App() {
   async function markLeadContacted(id) {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/dashboard/leads/${id}/contacted`,
+        `${API_BASE_URL}/api/dashboard/leads/${id}/contacted`,
         {
           method: "PUT",
         },
@@ -108,7 +111,7 @@ function App() {
   async function resolveEscalation(id) {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/dashboard/escalations/${id}/resolve`,
+        `${API_BASE_URL}/api/dashboard/escalations/${id}/resolve`,
         {
           method: "PUT",
         },
@@ -125,7 +128,6 @@ function App() {
     }
   }
 
-  
   return (
     <div className="dashboard">
       <header className="header">
